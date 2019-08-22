@@ -31,6 +31,15 @@ class AuthHeaders implements ParserContract
     protected $prefix = 'bearer';
 
     /**
+     * made for auth tokens
+     * that match this pattern:
+     * bearer { token }
+     *
+     * @var string
+     */
+    protected $curly_brace_prefix = 'bearer {';
+
+    /**
      * Attempt to parse the token from some other possible headers.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -53,7 +62,9 @@ class AuthHeaders implements ParserContract
     {
         $header = $request->headers->get($this->header) ?: $this->fromAltHeaders($request);
 
-        if ($header && preg_match('/'.$this->prefix.'\s*(\S+)\b/i', $header, $matches)) {
+        if ($header && (preg_match('/'.$this->prefix.'\s*(\S+)\b/i', $header, $matches)  || 
+                        preg_match('/'.$this->curly_brace_prefix.'\s*(\S+)\b/i', $header, $matches)
+                       )) { 
             return $matches[1];
         }
     }
